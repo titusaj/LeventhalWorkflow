@@ -1,6 +1,6 @@
 function createPLXFiles(nasPath)
     % see exportSessionConf.m for details, loads sessionConf variable
-    [f,p] = uigetfile({'*.mat'},'Select configuration file...');
+    [f,p] = uigetfile({fullfile(nasPath,'*.mat')},'Select configuration file...');
     load(fullfile(p,f));
     % get paths, create: processed
     leventhalPaths = buildLeventhalPaths(nasPath,sessionConf.sessionName,{'processed'});
@@ -11,7 +11,7 @@ function createPLXFiles(nasPath)
     validTetrodes = find(any(sessionConf.validMasks,2).*sessionConf.chMap(:,1));
     fullSevFiles = getChFileMap(leventhalPaths.session);
     
-    for ii=length(validTetrodes)
+    for ii=1:length(validTetrodes)
         tetrodeName = sessionConf.tetrodeNames{validTetrodes(ii)};
         disp(['Processing tetrode ',tetrodeName]);
         tetrodeChannels = sessionConf.chMap(validTetrodes(ii),2:end);
