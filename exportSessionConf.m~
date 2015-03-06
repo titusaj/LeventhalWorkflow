@@ -17,9 +17,9 @@ sessionConf.tetrodeNames = chMap.tetNames;
 nasPath = sql_findNASpath(sessionConf.ratID);
 leventhalPaths = buildLeventhalPaths(nasPath,sessionConf.sessionName);
 sevFiles = dir(fullfile(leventhalPaths.session,'*.sev'));
-header = getSEVHeader(fullfile(leventhalPaths.session,sevFiles(1).name));
-sessionConf.Fs = header.Fs;
 
+% get this from file or DB
+sessionConf.Fs = 2.441406250000000e+04;
 sessionConf.waveLength = 24;
 sessionConf.peakLoc = 8;
 sessionConf.deadTime = round(sessionConf.Fs/1000); %see getSpikeLocations.m

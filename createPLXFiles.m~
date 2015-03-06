@@ -12,9 +12,8 @@ function createPLXFiles(nasPath)
     fullSevFiles = getChFileMap(leventhalPaths.session);
     
     for ii=length(validTetrodes)
-        tetrodeName = sessionConf.tetrodeNames{validTetrodes(ii)};
-        disp(['Processing tetrode ',tetrodeName]);
         tetrodeChannels = sessionConf.chMap(validTetrodes(ii),2:end);
+        tetrodeName = sessionConf.tetrodeNames{validTetrodes(ii)};
         tetrodeValidMask = sessionConf.validMasks(validTetrodes(ii),:);
         
         tetrodeFilenames = fullSevFiles(tetrodeChannels);
