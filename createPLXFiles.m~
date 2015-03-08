@@ -1,27 +1,20 @@
 function createPLXFiles(sessionName,varargin)
-
-    onlyGoing = 'negative';
-    
-    for iarg = 1 : 2 : nargin - 1
+    for iarg = 1 : 2 : nargin - 6
         switch varargin{iarg}
-            case 'sessionConfPath'
-                sessionConfPath = varargin{iarg + 1};
             case 'nasPath',
                 nasPath = varargin{iarg + 1};
-            case 'onlyGoing'
-                onlyGoing = varargin{iarg + 1};
+            case 'sessionConfPath'
+                sessionConfPath = varargin{iarg + 1};
         end
     end
-    
-    % make sessionConf variable
-    if exist('sessionConfPath','var')
-        load(sessionConfPath);
+
+    if(nargin == 1) %regular user, on network
+        
+    elseif(nargin == 2) %power user, using conf file
+        load(varargin{1}); %load sessionConf from file
+        sessionConf.nasPath = varargin{2}; %override nasPath for local use
     else
-        sessionConf = exportSessionConf(sessionName);
-    end
-    % override nasPath for local use
-    if exist('nasPath','var')
-        sessionConf.nasPath = nasPath;
+        error('Missing arguments.');
     end
     
     % get paths, create: processed
@@ -41,7 +34,7 @@ function createPLXFiles(sessionName,varargin)
         
         tetrodeFilenames = fullSevFiles(tetrodeChannels);
         data = prepSEVData(tetrodeFilenames,tetrodeValidMask,500);
-        locs = getSpikeLocations(data,tetrodeValidMask,sessionConf.Fs,onlyGoing);
+        locs = getSpikeLocations(data,tetrodeValidMask,sessionConf.Fs,'negative');
         
         PLXfn = fullfile(leventhalPaths.processed,[sessionConf.sessionName,...
             '_',tetrodeName,'_',spikeParameterString,'.plx']);
