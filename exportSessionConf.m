@@ -8,8 +8,8 @@ function sessionConf = exportSessionConf(sessionName,varargin)
 
 for iarg = 1 : 2 : nargin - 1
     switch varargin{iarg}
-        case 'sessionConfDir'
-            sessionConfDir = varargin{iarg + 1};
+        case 'sessionConfPath'
+            sessionConfPath = varargin{iarg + 1};
     end
 end
 
@@ -31,9 +31,9 @@ sessionConf.waveLength = 24;
 sessionConf.peakLoc = 8;
 sessionConf.deadTime = round(sessionConf.Fs/1000); %see getSpikeLocations.m
 
-if exist('sessionConfDir','var')
+if exist('sessionConfPath','var')
     filename = ['session_conf_',sessionName,'.mat'];
-    filePath = fullfile(sessionConfDir,filename);
+    filePath = fullfile(sessionConfPath,filename);
     save(filePath,'sessionConf');
-    sessionConf.savePath = filePath;
+    sessionConf.file = filePath;
 end

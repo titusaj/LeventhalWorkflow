@@ -1,11 +1,13 @@
 function createPLXFiles(sessionName,varargin)
+% [] show amount of spikes extracted, total count at end (recap?), run time
+% [] input for artifact thresh
 
-    onlyGoing = 'negative';
+    onlyGoing = 'none';
     
     for iarg = 1 : 2 : nargin - 1
         switch varargin{iarg}
-            case 'sessionConfPath'
-                sessionConfPath = varargin{iarg + 1};
+            case 'sessionConfFile'
+                sessionConfFile = varargin{iarg + 1};
             case 'nasPath',
                 nasPath = varargin{iarg + 1};
             case 'onlyGoing'
@@ -14,8 +16,8 @@ function createPLXFiles(sessionName,varargin)
     end
     
     % make sessionConf variable
-    if exist('sessionConfPath','var')
-        load(sessionConfPath);
+    if exist('sessionConfFile','var')
+        load(sessionConfFile);  %!!error on failure
     else
         sessionConf = exportSessionConf(sessionName);
     end
@@ -33,14 +35,16 @@ function createPLXFiles(sessionName,varargin)
     validTetrodes = find(any(sessionConf.validMasks,2).*sessionConf.chMap(:,1));
     fullSevFiles = getChFileMap(leventhalPaths.session);
     
+    stats = {};
     for ii=1:length(validTetrodes)
         tetrodeName = sessionConf.tetrodeNames{validTetrodes(ii)};
-        disp(['Processing tetrode ',tetrodeName]);
+        disp(['PROCESSING ',tetrodeName]);
         tetrodeChannels = sessionConf.chMap(validTetrodes(ii),2:end);
         tetrodeValidMask = sessionConf.validMasks(validTetrodes(ii),:);
         
         tetrodeFilenames = fullSevFiles(tetrodeChannels);
         data = prepSEVData(tetrodeFilenames,tetrodeValidMask,500);
+        %!!NOT WORKING WITH MISSING CH!
         locs = getSpikeLocations(data,tetrodeValidMask,sessionConf.Fs,onlyGoing);
         
         PLXfn = fullfile(leventhalPaths.processed,[sessionConf.sessionName,...
@@ -52,8 +56,21 @@ function createPLXFiles(sessionName,varargin)
         waveforms = extractWaveforms(data,locs,sessionConf.peakLoc,...
             sessionConf.waveLength);
         disp('Writing waveforms to PLX file...');
-        writePLXdatablock(PLXid,waveforms,locs);
+        writePLXdatablock(PLXid,waveforms,locs); %write waveform files right now?
+        
+        stats{ii,1} = tetrodeName;
+        stats{ii,2} = length(locs);
     end
+    echoStats(stats);
+end
+
+function echoStats(stats)
+    disp(char(repmat(46,1,20)));
+    disp('EXTRACTION COMPLETE');
+    for ii=1:size(stats,1)
+        disp([stats{ii,1},' - ',num2str(stats{ii,2}),' spikes']);
+    end
+    disp(char(repmat(46,1,20)));
 end
 
 function data = prepSEVData(filenames,validMask,threshArtifacts)
@@ -61,7 +78,10 @@ function data = prepSEVData(filenames,validMask,threshArtifacts)
     dataLength = (header.fileSizeBytes - header.dataStartByte) / header.sampleWidthBytes;
     data = zeros(length(validMask),dataLength);
     for ii=1:length(filenames)
-        if ~validMask(ii), continue, end
+        if ~validMask(ii)
+            disp(['Skipping ',filenames{ii}]);
+            continue;
+        end
         disp(['Reading ',filenames{ii}]);
         [data(ii,:),~] = read_tdt_sev(filenames{ii});
         data(ii,:) = wavefilter(data(ii,:),6);
