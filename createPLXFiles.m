@@ -52,7 +52,7 @@ function createPLXFiles(sessionName,varargin)
         PLXid = makePLXInfo(PLXfn,sessionConf,tetrodeChannels,length(data));
         makePLXChannelHeader(PLXid,sessionConf,tetrodeChannels,tetrodeName);
         
-        disp('Extracing waveforms...');
+        disp('Extracting waveforms...');
         waveforms = extractWaveforms(data,locs,sessionConf.peakLoc,...
             sessionConf.waveLength);
         disp('Writing waveforms to PLX file...');
