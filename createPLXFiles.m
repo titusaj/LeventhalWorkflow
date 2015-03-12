@@ -45,7 +45,7 @@ function createPLXFiles(sessionName,varargin)
         tetrodeFilenames = fullSevFiles(tetrodeChannels);
         data = prepSEVData(tetrodeFilenames,tetrodeValidMask,500);
         %!!NOT WORKING WITH MISSING CH!
-        locs = getSpikeLocations(data,tetrodeValidMask,sessionConf.Fs,onlyGoing);
+        locs = getSpikeLocations(data,tetrodeValidMask,sessionConf.Fs,'onlyGoing',onlyGoing);
         
         PLXfn = fullfile(leventhalPaths.processed,[sessionConf.sessionName,...
             '_',tetrodeName,'_',spikeParameterString,'.plx']);
