@@ -10,6 +10,8 @@ for iarg = 1 : 2 : nargin - 1
     switch varargin{iarg}
         case 'sessionConfPath'
             sessionConfPath = varargin{iarg + 1};
+        case 'nasPath'
+            nasPath = varargin{iarg + 1};
     end
 end
 
@@ -21,7 +23,12 @@ sessionConf.chMap = chMap.chMap;
 sessionConf.validMasks = sql_getAllTetChannels(sessionConf.sessionName);
 sessionConf.tetrodeNames = chMap.tetNames;
 
-sessionConf.nasPath = sql_findNASpath(sessionConf.ratID);
+if exist('nasPath','var')
+    sessionConf.nasPath = nasPath;
+else
+    sessionConf.nasPath = sql_findNASpath(sessionConf.ratID);
+end
+
 leventhalPaths = buildLeventhalPaths(sessionConf.nasPath,sessionConf.sessionName);
 sevFiles = dir(fullfile(leventhalPaths.session,'*.sev'));
 header = getSEVHeader(fullfile(leventhalPaths.session,sevFiles(1).name));

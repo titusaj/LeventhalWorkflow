@@ -89,23 +89,6 @@ function data = prepSEVData(filenames,validMask,threshArtifacts)
     end
 end
 
-function fullSevFiles = getChFileMap(sessionPath)
-    sevFiles = dir(fullfile(sessionPath,'*.sev'));
-    chFileMap = zeros(length(sevFiles),1);
-    fullSevFiles = cell(length(sevFiles),1);
-    for ii=1:length(sevFiles)
-        chFileMap(ii) = getSEVChFromFilename(sevFiles(ii).name);
-        fullSevFiles{ii} = fullfile(sessionPath,sevFiles(ii).name);
-    end
-    fullSevFiles(chFileMap) = fullSevFiles; %remap so they are in order
-end
-
-function ch = getSEVChFromFilename(name)
-    C = strsplit(name,'_');
-    C = strsplit(C{end},'.'); %C{1} = chXX
-    ch = str2double(C{1}(3:end));
-end
-
 function makePLXChannelHeader(PLXid,sessionConf,tetrodeChannels,tetrodeName)
     for ii=1:length(tetrodeChannels)
         chInfo.tetName  = [sessionConf.sessionName,'_',tetrodeName];
