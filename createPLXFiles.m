@@ -1,4 +1,4 @@
-function createPLXFiles(sessionName,varargin)
+function createPLXFiles(sessionConf,varargin)
 % [] show amount of spikes extracted, total count at end (recap?), run time
 % [] input for artifact thresh
 
@@ -6,25 +6,11 @@ function createPLXFiles(sessionName,varargin)
     
     for iarg = 1 : 2 : nargin - 1
         switch varargin{iarg}
-            case 'sessionConfFile'
-                sessionConfFile = varargin{iarg + 1};
-            case 'nasPath',
-                nasPath = varargin{iarg + 1};
             case 'onlyGoing'
                 onlyGoing = varargin{iarg + 1};
         end
     end
-    
-    % make sessionConf variable
-    if exist('sessionConfFile','var')
-        load(sessionConfFile);  %!!error on failure
-    else
-        sessionConf = exportSessionConf(sessionName);
-    end
-    % override nasPath for local use
-    if exist('nasPath','var')
-        sessionConf.nasPath = nasPath;
-    end
+
     
     % get paths, create: processed
     leventhalPaths = buildLeventhalPaths(sessionConf.nasPath,sessionConf.sessionName,{'processed'});
@@ -84,9 +70,12 @@ function data = prepSEVData(filenames,validMask,threshArtifacts)
         end
         disp(['Reading ',filenames{ii}]);
         [data(ii,:),~] = read_tdt_sev(filenames{ii});
-        data(ii,:) = wavefilter(data(ii,:),6);
-        data(ii,:) = artifactThresh(double(data(ii,:)),threshArtifacts);
     end
+    disp('High pass filter...');
+    data = wavefilter(data,6);
+    %valid mask is kind of redundant here, zeros already set above
+    disp('Looking for artifacts...');
+    data = artifactThresh(double(data),validMask,threshArtifacts);
 end
 
 function makePLXChannelHeader(PLXid,sessionConf,tetrodeChannels,tetrodeName)
