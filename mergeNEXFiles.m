@@ -1,6 +1,6 @@
-function mergeNEXFiles(nasPath,sessionName)
+function mergeNEXFiles(sessionConf)
 
-leventhalPaths = buildLeventhalPaths(nasPath,sessionName);
+leventhalPaths = buildLeventhalPaths(sessionConf);
 disp('Making box.nex file...');
 TDTtoNex(sessionName,'nasPath',nasPath);
 disp('Merging all .nex files...');

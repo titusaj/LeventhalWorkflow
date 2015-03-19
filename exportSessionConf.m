@@ -22,6 +22,7 @@ chMap = sql_getChannelMap(sessionConf.ratID);
 sessionConf.chMap = chMap.chMap;
 sessionConf.validMasks = sql_getAllTetChannels(sessionConf.sessionName);
 sessionConf.tetrodeNames = chMap.tetNames;
+sessionConf.lfpChannels = sql_getLFPChannels(sessionConf.sessionName);
 
 if exist('nasPath','var')
     sessionConf.nasPath = nasPath;
@@ -29,9 +30,9 @@ else
     sessionConf.nasPath = sql_findNASpath(sessionConf.ratID);
 end
 
-leventhalPaths = buildLeventhalPaths(sessionConf.nasPath,sessionConf.sessionName);
-sevFiles = dir(fullfile(leventhalPaths.session,'*.sev'));
-header = getSEVHeader(fullfile(leventhalPaths.session,sevFiles(1).name));
+leventhalPaths = buildLeventhalPaths(sessionConf);
+sevFiles = dir(fullfile(leventhalPaths.channels,'*.sev'));
+header = getSEVHeader(fullfile(leventhalPaths.channels,sevFiles(1).name));
 sessionConf.Fs = header.Fs;
 
 sessionConf.waveLength = 24;

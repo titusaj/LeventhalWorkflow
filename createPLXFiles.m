@@ -1,19 +1,21 @@
 function createPLXFiles(sessionConf,varargin)
-% [] show amount of spikes extracted, total count at end (recap?), run time
 % [] input for artifact thresh
-
+    tic;
     onlyGoing = 'none';
+    threshArtifact = 500; %uV
     
     for iarg = 1 : 2 : nargin - 1
         switch varargin{iarg}
             case 'onlyGoing'
                 onlyGoing = varargin{iarg + 1};
+            case 'threshArtifact'
+                threshArtifact = varargin{iarg + 1};
         end
     end
 
     
     % get paths, create: processed
-    leventhalPaths = buildLeventhalPaths(sessionConf.nasPath,sessionConf.sessionName,{'processed'});
+    leventhalPaths = buildLeventhalPaths(sessionConf,{'processed'});
     
     spikeParameterString = sprintf('WL%02d_PL%02d_DT%02d', sessionConf.waveLength,...
        sessionConf.peakLoc, sessionConf.deadTime);
@@ -29,7 +31,7 @@ function createPLXFiles(sessionConf,varargin)
         tetrodeValidMask = sessionConf.validMasks(validTetrodes(ii),:);
         
         tetrodeFilenames = fullSevFiles(tetrodeChannels);
-        data = prepSEVData(tetrodeFilenames,tetrodeValidMask,500);
+        data = prepSEVData(tetrodeFilenames,tetrodeValidMask,threshArtifact);
         %!!NOT WORKING WITH MISSING CH!
         locs = getSpikeLocations(data,tetrodeValidMask,sessionConf.Fs,'onlyGoing',onlyGoing);
         
@@ -56,6 +58,7 @@ function echoStats(stats)
     for ii=1:size(stats,1)
         disp([stats{ii,1},' - ',num2str(stats{ii,2}),' spikes']);
     end
+    toc;
     disp(char(repmat(46,1,20)));
 end
 

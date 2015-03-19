@@ -1,1 +1,0 @@
-Blank slate spike extraction
