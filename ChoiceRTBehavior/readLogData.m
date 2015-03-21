@@ -32,30 +32,7 @@ function logData = readLogData(varargin)
 %       After that comes the actual data. The structure data field names
 %           are also written into the .log file and are task-specific.
 
-
-if ispc
-     nasAddress = '\\nasIP\';
-     
- elseif ismac
-     nasAddress = '/Volumes/';
-end
- 
-
-if nargin == 0
-    [fname, pname] = uigetfile(nasAddress,'.log','multiselect','off');
-    
-    if fname == 0
-        error('readLogData:fileCancel','user cancelled file selection');
-    end
-    fname = fullfile(pname, fname);
-else
-    fname = varargin{1};
-end
-
-%     dirs=dir('*.log');
-%     fname= dirs(1).name;
-
-
+fname = varargin{1};
 bitOrder = 'b';
 
 commentLength = 200;
