@@ -21,7 +21,7 @@ function createPLXFiles(sessionConf,varargin)
        sessionConf.peakLoc, sessionConf.deadTime);
 
     validTetrodes = find(any(sessionConf.validMasks,2).*sessionConf.chMap(:,1));
-    fullSevFiles = getChFileMap(leventhalPaths.session);
+    fullSevFiles = getChFileMap(leventhalPaths.channels);
     
     stats = {};
     for ii=1:length(validTetrodes)
