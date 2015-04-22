@@ -12,8 +12,13 @@ function h_axis = createFigAxes(h_fig)
 % OUTPUTS:
 %   h_axis - axis handle for new axes that encompass the full figure
 
-figPos = get(gcf,'position');
+prev_fig = gcf;
+figure(h_fig);
+
+figPos = get(h_fig,'position');
 units =  get(h_fig, 'units');
 h_axis = axes('units', units, ...
               'position', [0 0 figPos(3) figPos(4)], ...
               'visible', 'off');
+          
+figure(prev_fig);
