@@ -6,6 +6,7 @@ function sessionConf = exportSessionConf(sessionName,varargin)
 %   varargin, saveDir: where you want this config file save, right now the
 %   extractSpikesTDT script prompts for the location of this file
 
+
 for iarg = 1 : 2 : nargin - 1
     switch varargin{iarg}
         case 'sessionConfPath'
@@ -15,6 +16,7 @@ for iarg = 1 : 2 : nargin - 1
     end
 end
 
+%set up fields of struct
 sessionConf = struct;
 sessionConf.sessionName = sessionName;
 [~,sessionConf.ratID] = sql_getSubjectFromSession(sessionName);

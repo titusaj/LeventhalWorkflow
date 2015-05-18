@@ -36,6 +36,7 @@ fname = varargin{1};
 bitOrder = 'b';
 
 commentLength = 200;
+%open the file that was input to read from
 fid = fopen(fname, 'r');
 
 logData.fileVersion = fread(fid, 1, 'uint16', 0, bitOrder);
@@ -43,14 +44,18 @@ if logData.fileVersion > 1000    % indicates that this is not the standard log f
     logData = [];
     return;
 end
+
+%fill in fields of logData from the file
 logData.taskID      = fread(fid, 1, 'uint8', 0, bitOrder);
 logData.taskVersion = fread(fid, 1, 'uint8', 0, bitOrder);
 logData.subject     = deblank(fread(fid, 10, '*char')');
 logData.date        = fread(fid, 8, '*char')';
 logData.startTime   = fread(fid, 5, '*char')';
 
+%change positions within the file
 fseek(fid, 2 * 1024, 'bof');
 
+%get rid of null characters within the comment
 logData.comment = deblank(fread(fid, 1024, '*char')');
 
 fseek(fid, 3 * 1024, 'bof');

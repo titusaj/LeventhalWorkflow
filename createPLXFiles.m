@@ -1,6 +1,10 @@
 function createPLXFiles(sessionConf,varargin)
+%Function to create a PLX file in the correct format
+
 % [] input for artifact thresh
+    %Start the stop watch
     tic;
+    %Set default values
     onlyGoing = 'none';
     threshArtifact = 500; %uV
     
@@ -24,6 +28,8 @@ function createPLXFiles(sessionConf,varargin)
     fullSevFiles = getChFileMap(leventhalPaths.channels);
     
     stats = {};
+    %Loop through the valid tetrodes to get the name, channel, valid mask,
+    %and SEV filenames
     for ii=1:length(validTetrodes)
         tetrodeName = sessionConf.tetrodeNames{validTetrodes(ii)};
         disp(['PROCESSING ',tetrodeName]);
@@ -31,8 +37,11 @@ function createPLXFiles(sessionConf,varargin)
         tetrodeValidMask = sessionConf.validMasks(validTetrodes(ii),:);
         
         tetrodeFilenames = fullSevFiles(tetrodeChannels);
+        
+        %Filter the data and cure artifacts
         data = prepSEVData(tetrodeFilenames,tetrodeValidMask,threshArtifact);
         %!!NOT WORKING WITH MISSING CH!
+        %Get the locations of the spikes
         locs = getSpikeLocations(data,tetrodeValidMask,sessionConf.Fs,'onlyGoing',onlyGoing);
         
         PLXfn = fullfile(leventhalPaths.processed,[sessionConf.sessionName,...
@@ -49,15 +58,21 @@ function createPLXFiles(sessionConf,varargin)
         stats{ii,1} = tetrodeName;
         stats{ii,2} = length(locs);
     end
+    %Display the number of spikes found
     echoStats(stats);
 end
 
 function echoStats(stats)
+%Function to display to the user the number of spikes found
+    %Display 20 periods
     disp(char(repmat(46,1,20)));
     disp('EXTRACTION COMPLETE');
+    %Loop through tetrodes, display the name of the tetride and how many
+    %spikes were found on that tetrode
     for ii=1:size(stats,1)
         disp([stats{ii,1},' - ',num2str(stats{ii,2}),' spikes']);
     end
+    %Stop the stopwatch and display the amount of time
     toc;
     disp(char(repmat(46,1,20)));
 end
@@ -72,9 +87,11 @@ function data = prepSEVData(filenames,validMask,threshArtifacts)
             continue;
         end
         disp(['Reading ',filenames{ii}]);
+        %Read in the data from the SEV files
         [data(ii,:),~] = read_tdt_sev(filenames{ii});
     end
     disp('High pass filter...');
+    %Filter data
     data = wavefilter(data,6);
     %valid mask is kind of redundant here, zeros already set above
     disp('Looking for artifacts...');
@@ -82,6 +99,8 @@ function data = prepSEVData(filenames,validMask,threshArtifacts)
 end
 
 function makePLXChannelHeader(PLXid,sessionConf,tetrodeChannels,tetrodeName)
+%Function to prepare data in a format to make a channel header in a PLX
+%file
     for ii=1:length(tetrodeChannels)
         chInfo.tetName  = [sessionConf.sessionName,'_',tetrodeName];
         chInfo.wireName = sprintf('%s_W%02d', tetrodeName, ii);
@@ -102,6 +121,7 @@ function makePLXChannelHeader(PLXid,sessionConf,tetrodeChannels,tetrodeName)
 end
 
 function PLXid = makePLXInfo(PLXfn,sessionConf,tetrodeChannels,dataLength)
+%Function to prepare data to make a header in the PLX file
     sessionDateStr = sessionConf.sessionName(7:14);
     sessionDateVec = datevec(sessionDateStr, 'yyyymmdd');
 
