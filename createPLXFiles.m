@@ -91,8 +91,11 @@ function data = prepSEVData(filenames,validMask,threshArtifacts)
         [data(ii,:),~] = read_tdt_sev(filenames{ii});
     end
     disp('High pass filter...');
-    %Filter data
-    data = wavefilter(data,6);
+    %Filter data, bandpass ~240Hz and ~2.4kHz
+    [b,a] = butter(4, [0.02 0.2]);
+    for ii=1:size(data,1)
+        data(ii,:) = filtfilt(b,a,double(data(ii,:)));
+    end
     %valid mask is kind of redundant here, zeros already set above
     disp('Looking for artifacts...');
     data = artifactThresh(double(data),validMask,threshArtifacts);
