@@ -22,9 +22,13 @@ sessionConf.sessionName = sessionName;
 [~,sessionConf.ratID] = sql_getSubjectFromSession(sessionName);
 chMap = sql_getChannelMap(sessionConf.ratID);
 sessionConf.chMap = chMap.chMap;
-sessionConf.validMasks = sql_getAllTetChannels(sessionConf.sessionName);
 sessionConf.tetrodeNames = chMap.tetNames;
-sessionConf.lfpChannels = sql_getLFPChannels(sessionConf.sessionName);
+try
+    sessionConf.validMasks = sql_getAllTetChannels(sessionConf.sessionName);
+    sessionConf.lfpChannels = sql_getLFPChannels(sessionConf.sessionName);
+catch
+    disp('No tetrode session found: validMasks and lfpChannels not valid');
+end
 
 if exist('nasPath','var')
     sessionConf.nasPath = nasPath;
@@ -34,11 +38,16 @@ end
 
 leventhalPaths = buildLeventhalPaths(sessionConf);
 sevFiles = dir(fullfile(leventhalPaths.channels,'*.sev'));
-header = getSEVHeader(fullfile(leventhalPaths.channels,sevFiles(1).name));
-sessionConf.Fs = header.Fs;
+if isempty(sevFiles)
+    disp('No SEV files found');
+    sessionConf.Fs = 0;
+else
+    header = getSEVHeader(fullfile(leventhalPaths.channels,sevFiles(1).name));
+    sessionConf.Fs = header.Fs;
+end
 
-sessionConf.waveLength = 24;
-sessionConf.peakLoc = 8;
+sessionConf.waveLength = 48;
+sessionConf.peakLoc = 16;
 sessionConf.deadTime = round(sessionConf.Fs/1000); %see getSpikeLocations.m
 
 if exist('sessionConfPath','var')

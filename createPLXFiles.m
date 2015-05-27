@@ -17,7 +17,6 @@ function createPLXFiles(sessionConf,varargin)
         end
     end
 
-    
     % get paths, create: processed
     leventhalPaths = buildLeventhalPaths(sessionConf,{'processed'});
     
@@ -40,9 +39,13 @@ function createPLXFiles(sessionConf,varargin)
         
         %Filter the data and cure artifacts
         data = prepSEVData(tetrodeFilenames,tetrodeValidMask,threshArtifact);
-        %!!NOT WORKING WITH MISSING CH!
         %Get the locations of the spikes
-        locs = getSpikeLocations(data,tetrodeValidMask,sessionConf.Fs,'onlyGoing',onlyGoing);
+        spikeExtractPath = fullfile(leventhalPaths.graphs,'spikeExtract');
+        if ~exist(spikeExtractPath,'dir')
+            mkdir(spikeExtractPath);
+        end
+        locs = getSpikeLocations(data,tetrodeValidMask,sessionConf.Fs,'onlyGoing',onlyGoing,...
+            'saveDir',spikeExtractPath,'savePrefix',tetrodeName);
         
         PLXfn = fullfile(leventhalPaths.processed,[sessionConf.sessionName,...
             '_',tetrodeName,'_',spikeParameterString,'.plx']);
@@ -90,14 +93,14 @@ function data = prepSEVData(filenames,validMask,threshArtifacts)
         %Read in the data from the SEV files
         [data(ii,:),~] = read_tdt_sev(filenames{ii});
     end
-    disp('High pass filter...');
+    disp('Bandpass filtering...');
     %Filter data, bandpass ~240Hz and ~2.4kHz
     [b,a] = butter(4, [0.02 0.2]);
     for ii=1:size(data,1)
         data(ii,:) = filtfilt(b,a,double(data(ii,:)));
     end
     %valid mask is kind of redundant here, zeros already set above
-    disp('Looking for artifacts...');
+    disp('Fixing high amplitude artifacts...');
     data = artifactThresh(double(data),validMask,threshArtifacts);
 end
 

@@ -12,8 +12,8 @@ function showRawTetrodeWires(sessionConf,varargin)
 %   Displays figure with 8 graphs, raw data on the left and filtered data
 %   on the right
 
-    numSegments = 1;
-    segmentLength = 1e5;
+    numSegments = 3;
+    segmentLength = 5e4;
 
     for iarg = 1 : 2 : nargin - 1
         switch varargin{iarg}
@@ -36,12 +36,17 @@ function showRawTetrodeWires(sessionConf,varargin)
         mkdir(figurePath);
     end
 
-    hsRaw = cell(4,1);
-    hsHp = cell(4,1);
+%     hsRaw = cell(4,1);
+%     hsHp = cell(4,1);
     %Loop through valid tetrodes to get the tetrode names and channels
     for iTet=1:length(validTetrodes)
         tetrodeName = sessionConf.tetrodeNames{validTetrodes(iTet)};
         tetrodeChannels = sessionConf.chMap(validTetrodes(iTet),2:end);
+        % handle issue of only having 64 SEV files but 128 in chMap
+        if min(tetrodeChannels) > length(fullSevFiles)
+            disp(['Breaking at ',tetrodeName,' (no more SEV files)']);
+            break;
+        end
         tetrodeFilenames = fullSevFiles(tetrodeChannels);
         %Loop through each segment
         for iSeg=1:numSegments
