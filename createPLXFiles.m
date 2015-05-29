@@ -56,7 +56,7 @@ function createPLXFiles(sessionConf,varargin)
         waveforms = extractWaveforms(data,locs,sessionConf.peakLoc,...
             sessionConf.waveLength);
         disp('Writing waveforms to PLX file...');
-        writePLXdatablock(PLXid,waveforms,locs); %write waveform files right now?
+        writePLXdatablock(PLXid,waveforms,locs);
         
         stats{ii,1} = tetrodeName;
         stats{ii,2} = length(locs);
@@ -112,7 +112,7 @@ function makePLXChannelHeader(PLXid,sessionConf,tetrodeChannels,tetrodeName)
         chInfo.wireName = sprintf('%s_W%02d', tetrodeName, ii);
 
         chInfo.wireNum   = ii; %tetrode number
-        chInfo.WFRate    = sessionConf.Fs;
+        chInfo.WFRate    = 0; % sessionConf.Fs; !!!cant be Fs, gets converted to int
         chInfo.SIG       = tetrodeChannels(ii);  %channel number
         chInfo.refWire   = 0;     % not sure exactly what this is; Alex had it set to zero
         chInfo.gain      = 300;
