@@ -91,8 +91,8 @@ fseek(fid, 6 * 1024, 'bof');
 % read in the actual data
 data = fread(fid, [numDataFields, inf], 'double', 0, bitOrder);
 if ~isempty(data)
-for iField = 1 : numDataFields
-    logData.(dataFieldNames{iField}) = data(iField, :)';
-end    
+    for iField = 1 : numDataFields
+        logData.(dataFieldNames{iField}) = data(iField, :)';
+    end    
 end
 fclose(fid);
