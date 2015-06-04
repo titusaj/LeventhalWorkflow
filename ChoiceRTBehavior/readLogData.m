@@ -1,4 +1,4 @@
-function logData = readLogData(varargin)
+function logData = readLogData(fname)
 %
 % update 08/22/2014 to allow varargin for filename
 %
@@ -32,7 +32,7 @@ function logData = readLogData(varargin)
 %       After that comes the actual data. The structure data field names
 %           are also written into the .log file and are task-specific.
 
-fname = varargin{1};
+%fname = varargin{1}; //there's only one input, so no need for varargin
 bitOrder = 'b';
 
 commentLength = 200;
