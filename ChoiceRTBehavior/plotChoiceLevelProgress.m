@@ -52,7 +52,9 @@ for ii=1:length(logFilenames)
     end
 end
 
-h = figure('position',[100 100 900 400]);
+h = figure('position',[100 100 1000 700]);
+legendText = {};
+jj = 1;
 for ii=1:size(compiledDays,1)
     % skip mishaps
     if ~any(compiledDays(ii,:))
@@ -61,12 +63,13 @@ for ii=1:size(compiledDays,1)
     hold on;
     levelRange = compiledDays(ii,2:end) > 0;
     plot(compiledDays(ii,logical([1 levelRange])),'lineWidth',5);
+    legendText{jj} = allSubjects{ii};
+    jj = jj + 1;
 end
-for ii=1:9
-    hold on;
-    set(gca,'XTick',ii,'XTickLabel',choiceRTdifficulty{ii});
-end
-th = rotateticklabel(h,45);
+set(gca,'XTickLabel',choiceRTdifficulty,'FontSize',20);
+rotateXLabels(gca(),45);
 grid on;
 xlim([1 9]);
-disp('end');
+legend(legendText,'Location','northwest');
+ylabel('Start of Task (days)','FontSize',20);
+title('Choice Task Progression','FontSize',26);
