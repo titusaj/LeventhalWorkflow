@@ -6,6 +6,10 @@ function sessionConf = exportSessionConf(sessionName,varargin)
 %   varargin, saveDir: where you want this config file save, right now the
 %   extractSpikesTDT script prompts for the location of this file
 
+% 7/1/15 Fred Edits for 50micron analysis. Simplify and Take out sql shit
+%
+%
+
 
 for iarg = 1 : 2 : nargin - 1
     switch varargin{iarg}
@@ -19,22 +23,27 @@ end
 %set up fields of struct
 sessionConf = struct;
 sessionConf.sessionName = sessionName;
-[~,sessionConf.ratID] = sql_getSubjectFromSession(sessionName);
-chMap = sql_getChannelMap(sessionConf.ratID);
-sessionConf.chMap = chMap.chMap;
-sessionConf.tetrodeNames = chMap.tetNames;
-try
-    sessionConf.validMasks = sql_getAllTetChannels(sessionConf.sessionName);
-    sessionConf.lfpChannels = sql_getLFPChannels(sessionConf.sessionName);
-catch
-    disp('No tetrode session found: validMasks and lfpChannels not valid');
-end
+sessionConf.ratID = input('What is ratID?','s')
+sessionConf.nasPath = uigetdir
 
-if exist('nasPath','var')
-    sessionConf.nasPath = nasPath;
-else
-    sessionConf.nasPath = sql_findNASpath(sessionConf.ratID);
-end
+
+
+%[~,sessionConf.ratID] = sql_getSubjectFromSession(sessionName);
+%chMap = sql_getChannelMap(sessionConf.ratID);
+%sessionConf.chMap = chMap.chMap;
+%sessionConf.tetrodeNames = chMap.tetNames;
+%try
+%    sessionConf.validMasks = sql_getAllTetChannels(sessionConf.sessionName);
+%    sessionConf.lfpChannels = sql_getLFPChannels(sessionConf.sessionName);
+%catch
+%    disp('No tetrode session found: validMasks and lfpChannels not valid');
+%end
+
+% if exist('nasPath','var')
+%     sessionConf.nasPath = nasPath;
+% else
+%     sessionConf.nasPath = sql_findNASpath(sessionConf.ratID);
+% end
 
 leventhalPaths = buildLeventhalPaths(sessionConf);
 sevFiles = dir(fullfile(leventhalPaths.channels,'*.sev'));

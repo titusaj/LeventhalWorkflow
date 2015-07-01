@@ -65,14 +65,47 @@ function createPLXFiles(sessionName, waveLength,peakLoc,deadTime,varargin,wires)
     makePLXChannelHeader(PLXid,sessionName, waveLength,num2str(wire(ii)));
         
     disp('Extracting waveforms...');
-    waveforms = extractWaveforms(data,locs,peakLoc,waveLength);
+    waveforms = extractWaveforms(data,locs,peakLoc,...
+            waveLength);
     disp('Writing waveforms to PLX file...');
-    writePLXdatablock(PLXid,waveforms,locs);   
-    
-     stats{ii,1} = num2str(wire(ii));
-     stats{ii,2} = length(locs);
+    writePLXdatablock(PLXid,waveforms,locs);    
+
+
     end
     
+%     for ii=1:length(validTetrodes)
+%         tetrodeName = sessionConf.tetrodeNames{validTetrodes(ii)};
+%         disp(['PROCESSING ',tetrodeName]);
+%         tetrodeChannels = sessionConf.chMap(validTetrodes(ii),2:end);
+%         tetrodeValidMask = sessionConf.validMasks(validTetrodes(ii),:);
+%         
+%         tetrodeFilenames = fullSevFiles(tetrodeChannels);
+%         
+%         %Filter the data and cure artifacts
+%         data = prepSEVData(tetrodeFilenames,tetrodeValidMask,threshArtifact);
+%         %Get the locations of the spikes
+%         spikeExtractPath = fullfile(leventhalPaths.graphs,'spikeExtract');
+%         if ~exist(spikeExtractPath,'dir')
+%             mkdir(spikeExtractPath);
+%         end
+%         locs = getSpikeLocations(data,tetrodeValidMask,sessionConf.Fs,'onlyGoing',onlyGoing,...
+%             'saveDir',spikeExtractPath,'savePrefix',tetrodeName);
+%         
+%         PLXfn = fullfile(leventhalPaths.processed,[sessionConf.sessionName,...
+%             '_',tetrodeName,'_',spikeParameterString,'.plx']);
+%         PLXid = makePLXInfo(PLXfn,sessionConf,tetrodeChannels,length(data));
+%         makePLXChannelHeader(PLXid,sessionConf,tetrodeChannels,tetrodeName);
+%         
+%         disp('Extracting waveforms...');
+%         waveforms = extractWaveforms(data,locs,sessionConf.peakLoc,...
+%             sessionConf.waveLength);
+%         disp('Writing waveforms to PLX file...');
+%         writePLXdatablock(PLXid,waveforms,locs);
+%         
+%         stats{ii,1} = tetrodeName;
+%         stats{ii,2} = length(locs);
+%     end
+    %Display the number of spikes found
     echoStats(stats);
 end
 
