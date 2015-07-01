@@ -1,14 +1,23 @@
-function createPLXFiles(sessionName, waveLength,peakLoc,deadTime,varargin,wires)
+function createPLXFiles(sessionName,wires,varargin)
 %Function to create a PLX file in the correct format
 %wires input is hard coded representation of the 50 micron wires
+%Fred Edit. Now no need for sessionconf variable since waveLength,peakLoc,
+%deadTime all are hardcoded. Also uses only 1 wire at a time. 
+%
+%wires = vector of known/good channels. 
 
 % [] input for artifact thresh
-    %Start the stop watch
+
+%Start the stop watch
     tic;
     %Set default values
     onlyGoing = 'none';
-    threshArtifact = 500; %uV
+    threshArtifacts = 500; %uV
+    waveLength = 48;
+    peakLoc = 16;
+    deadTime = round(24414/1000);
     
+   
     for iarg = 1 : 2 : nargin - 1
         switch varargin{iarg}
             case 'onlyGoing'
@@ -36,7 +45,7 @@ function createPLXFiles(sessionName, waveLength,peakLoc,deadTime,varargin,wires)
         header = getSEVHeader(fullSevFiles{wires(ii)});
         dataLength = (header.fileSizeBytes - header.dataStartByte) / header.sampleWidthBytes;
         data = zeros(1,dataLength);
-        data = read_tdt_sev(fullSEVfiles{wires(ii)});
+        data = read_tdt_sev(fullSevFiles{wires(ii)});
     disp('Bandpass filtering...');
     %Filter data, bandpass ~240Hz and ~2.4kHz
     [b,a] = butter(4, [0.02 0.2]);
@@ -56,56 +65,25 @@ function createPLXFiles(sessionName, waveLength,peakLoc,deadTime,varargin,wires)
     end 
     
     locs = getSpikeLocations(data,[1 0 0 0],header.Fs,'onlyGoing',onlyGoing,...
-    'saveDir',spikeExtractPath,'savePrefix',num2str(wire(ii)));
+    'saveDir',spikeExtractPath,'savePrefix',num2str(wires(ii)));
 
 
     PLXfn = fullfile(spikeProcessedPath,[sessionName,...
-    '_',wire(ii),'_',spikeParameterString,'.plx']);
+    '_',num2str(wires(ii)),'_',spikeParameterString,'.plx']);
     PLXid = makePLXInfo(PLXfn,sessionName,header.Fs, length(data),waveLength,peakLoc);
-    makePLXChannelHeader(PLXid,sessionName, waveLength,num2str(wire(ii)));
+    
+    
+    makePLXChannelHeader(PLXid,sessionName, waveLength ,num2str(wires(ii)));
         
     disp('Extracting waveforms...');
-    waveforms = extractWaveforms(data,locs,peakLoc,...
-            waveLength);
+    waveforms = extractWaveforms(data,locs,peakLoc,waveLength);
     disp('Writing waveforms to PLX file...');
-    writePLXdatablock(PLXid,waveforms,locs);    
-
-
+    writePLXdatablock(PLXid,waveforms,locs);   
+    
+    stats{ii,1} = num2str(wires(ii));
+    stats{ii,2} = length(locs);
     end
     
-%     for ii=1:length(validTetrodes)
-%         tetrodeName = sessionConf.tetrodeNames{validTetrodes(ii)};
-%         disp(['PROCESSING ',tetrodeName]);
-%         tetrodeChannels = sessionConf.chMap(validTetrodes(ii),2:end);
-%         tetrodeValidMask = sessionConf.validMasks(validTetrodes(ii),:);
-%         
-%         tetrodeFilenames = fullSevFiles(tetrodeChannels);
-%         
-%         %Filter the data and cure artifacts
-%         data = prepSEVData(tetrodeFilenames,tetrodeValidMask,threshArtifact);
-%         %Get the locations of the spikes
-%         spikeExtractPath = fullfile(leventhalPaths.graphs,'spikeExtract');
-%         if ~exist(spikeExtractPath,'dir')
-%             mkdir(spikeExtractPath);
-%         end
-%         locs = getSpikeLocations(data,tetrodeValidMask,sessionConf.Fs,'onlyGoing',onlyGoing,...
-%             'saveDir',spikeExtractPath,'savePrefix',tetrodeName);
-%         
-%         PLXfn = fullfile(leventhalPaths.processed,[sessionConf.sessionName,...
-%             '_',tetrodeName,'_',spikeParameterString,'.plx']);
-%         PLXid = makePLXInfo(PLXfn,sessionConf,tetrodeChannels,length(data));
-%         makePLXChannelHeader(PLXid,sessionConf,tetrodeChannels,tetrodeName);
-%         
-%         disp('Extracting waveforms...');
-%         waveforms = extractWaveforms(data,locs,sessionConf.peakLoc,...
-%             sessionConf.waveLength);
-%         disp('Writing waveforms to PLX file...');
-%         writePLXdatablock(PLXid,waveforms,locs);
-%         
-%         stats{ii,1} = tetrodeName;
-%         stats{ii,2} = length(locs);
-%     end
-    %Display the number of spikes found
     echoStats(stats);
 end
 
@@ -152,9 +130,9 @@ function makePLXChannelHeader(PLXid,sessionName, waveLength, tetrodeName)
 %Function to prepare data in a format to make a channel header in a PLX
 %file
         chInfo.tetName  = [sessionName,'_',tetrodeName];
-        chInfo.wireName = sprintf('%s_W%02d', tetrodeName, ii);
+        chInfo.wireName = sprintf('%s_50micron', tetrodeName);
 
-        chInfo.wireNum   = ii; %tetrode number
+        chInfo.wireNum   = str2num(tetrodeName); %tetrode number
         chInfo.WFRate    = 0; % sessionConf.Fs; !!!cant be Fs, gets converted to int
         chInfo.SIG       = 1;  %channel number
         chInfo.refWire   = 0;     % not sure exactly what this is; Alex had it set to zero
